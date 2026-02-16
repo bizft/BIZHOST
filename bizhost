@@ -180,9 +180,23 @@ stop_server
 ;;
 
 6)
-echo "Updating packages..."
-pkg update -y && pkg upgrade -y
-sleep 2
+clear
+echo "Updating BIZ HOST..."
+
+URL="https://raw.githubusercontent.com/bizft/BIZHOST/refs/heads/master/bizhost"
+TARGET="$PREFIX/bin/bizhost"
+
+curl -L "$URL" -o "$TARGET"
+
+if [ $? -eq 0 ]; then
+    chmod +x "$TARGET"
+    echo "Update successful!"
+    echo "Restart BIZHOST to apply changes."
+else
+    echo "Update failed!"
+fi
+
+sleep 3
 ;;
 
 x|X)
