@@ -143,6 +143,12 @@ case $opt in
 clear
 echo "Starting server..."
 start_server
+
+echo ""
+echo "SERVER ACTIVE"
+echo "Local → http://localhost:8080"
+echo ""
+read -p "Press ENTER to return to menu..."
 ;;
 
 2)
