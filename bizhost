@@ -2,6 +2,7 @@
 
 CONFIG="$PREFIX/tmp/bizhost.conf"
 PIDFILE="$PREFIX/tmp/bizhost.pid"
+WATCHDOG="$PREFIX/tmp/bizhost.watchdog"
 TMP="$PREFIX/tmp/bizhostlink.log"
 
 mkdir -p "$PREFIX/tmp"
@@ -19,16 +20,37 @@ mkdir -p "$SITE"
 # ===== FUNCTIONS =====
 
 start_server() {
+
+# Kill old server & watchdog
 pkill php 2>/dev/null
+[ -f "$WATCHDOG" ] && kill $(cat "$WATCHDOG") 2>/dev/null && rm -f "$WATCHDOG"
 
-php -S 127.0.0.1:8080 -t "$SITE" > /dev/null 2>&1 &
-echo $! > "$PIDFILE"
+# ===== WATCHDOG LOOP =====
+(
+while true
+do
+    php -S 127.0.0.1:8080 -t "$SITE" > /dev/null 2>&1 &
+    SERVER_PID=$!
 
-# Wait until server ready (fix 502)
-for i in {1..20}; do
-    curl -s http://127.0.0.1:8080 > /dev/null && break
-    sleep 0.5
+    echo $SERVER_PID > "$PIDFILE"
+
+    # Wait until server ready (fix 502)
+    for i in {1..20}; do
+        curl -s http://127.0.0.1:8080 > /dev/null && break
+        sleep 0.5
+    done
+
+    wait $SERVER_PID
+
+    echo "Server crashed — restarting..."
+    sleep 1
 done
+) &
+
+echo $! > "$WATCHDOG"
+
+echo "Server running → http://localhost:8080"
+sleep 2
 }
 
 create_tunnel() {
@@ -67,9 +89,13 @@ tail -f /dev/null
 }
 
 stop_server() {
+
 pkill php 2>/dev/null
 pkill cloudflared 2>/dev/null
+
+[ -f "$WATCHDOG" ] && kill $(cat "$WATCHDOG") 2>/dev/null && rm -f "$WATCHDOG"
 rm -f "$PIDFILE"
+
 echo "Server stopped"
 sleep 2
 }
@@ -83,7 +109,7 @@ while true
 do
 clear
 
-# ===== BIZ HOST LOGO BRANDING =====
+# ===== BIZ HOST LOGO =====
 echo -e "\e[1;32m██████╗ ██╗███████╗     ██╗  ██╗ ██████╗ ███████╗████████╗\e[0m"
 echo -e "\e[1;32m██╔══██╗██║╚══███╔╝     ██║  ██║██╔═══██╗██╔════╝╚══██╔══╝\e[0m"
 echo -e "\e[1;36m██████╔╝██║  ███╔╝█████╗███████║██║   ██║███████╗   ██║   \e[0m"
@@ -117,8 +143,6 @@ case $opt in
 clear
 echo "Starting server..."
 start_server
-echo "Server running → http://localhost:8080"
-sleep 2
 ;;
 
 2)
