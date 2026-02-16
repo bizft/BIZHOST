@@ -1,96 +1,159 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
+# =============================================
+# BIZHOST - BIZ FACTORY EDITION
+# Version: 2.0
+# Author: BIZ FACTORY
+# =============================================
+
 SITE="/storage/emulated/0/BIZHOST"
 PIDFILE="$PREFIX/tmp/bizhost.pid"
 TMP="$PREFIX/tmp/bizhostlink.log"
+VERSION="2.0"
+UPDATE_URL="https://raw.githubusercontent.com/bizft/BIZHOST/refs/heads/master/bizhost"  # Change this to your actual update URL
 
 mkdir -p "$PREFIX/tmp"
 mkdir -p "$SITE"
 
-# ===== BOOT =====
+# === COLOR DEFINITIONS ===
+RED='\e[1;31m'
+GREEN='\e[1;32m'
+YELLOW='\e[1;33m'
+BLUE='\e[1;36m'
+MAGENTA='\e[1;35m'
+WHITE='\e[1;37m'
+NC='\e[0m'
+
+# === BOOT ANIMATION ===
 clear
-echo -e "\e[1;32mBooting BIZHOST OS...\e[0m"
+echo -e "${GREEN}Booting BIZHOST OS...${NC}"
 for i in {1..30}; do printf "█"; sleep 0.03; done
 sleep 0.5
 echo ""
-echo -e "\e[1;36mInitializing secure modules...\e[0m"
+echo -e "${BLUE}Initializing secure modules...${NC}"
 sleep 0.5
-echo -e "\e[1;31mSecurity layer active\e[0m"
+echo -e "${RED}Security layer active${NC}"
 sleep 0.5
-echo -e "\e[1;32mSystem ready\e[0m"
+echo -e "${GREEN}System ready${NC}"
 sleep 1
 
-while true
-do
+while true; do
 clear
 
-# ===== BIZ FACTORY BRAND LOGO =====
-echo -e "\e[1;32m██████╗ ██╗███████╗     ███████╗ █████╗  ██████╗ ████████╗ ██████╗ ██████╗ ██╗   ██╗"
+# === LOGO ===
+echo -e "${GREEN}██████╗ ██╗███████╗     ███████╗ █████╗  ██████╗ ████████╗ ██████╗ ██████╗ ██╗   ██╗"
 echo "██╔══██╗██║╚══███╔╝     ██╔════╝██╔══██╗██╔════╝ ╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝"
-echo -e "\e[1;36m██████╔╝██║  ███╔╝█████╗█████╗  ███████║██║         ██║   ██║   ██║██████╔╝ ╚████╔╝ \e[0m"
-echo -e "\e[1;36m██╔══██╗██║ ███╔╝ ╚════╝██╔══╝  ██╔══██║██║         ██║   ██║   ██║██╔══██╗  ╚██╔╝  \e[0m"
-echo -e "\e[1;33m██████╔╝██║███████╗     ██║     ██║  ██║╚██████╗    ██║   ╚██████╔╝██║  ██║   ██║   \e[0m"
-echo -e "\e[1;33m╚═════╝ ╚═╝╚══════╝     ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   \e[0m"
-
-echo -e "\e[1;35m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-echo -e "\e[1;36m        ⚡ BIZHOST — BIZ FACTORY ⚡\e[0m"
-echo -e "\e[1;31m        Secure • Lightweight • Mobile Hosting\e[0m"
-echo -e "\e[1;37m        USER : $(whoami)\e[0m"
-echo -e "\e[1;33m        ROOT : $SITE\e[0m"
-echo -e "\e[1;35m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+echo -e "${BLUE}██████╔╝██║  ███╔╝█████╗█████╗  ███████║██║         ██║   ██║   ██║██████╔╝ ╚████╔╝ ${NC}"
+echo -e "${BLUE}██╔══██╗██║ ███╔╝ ╚════╝██╔══╝  ██╔══██║██║         ██║   ██║   ██║██╔══██╗  ╚██╔╝  ${NC}"
+echo -e "${YELLOW}██████╔╝██║███████╗     ██║     ██║  ██║╚██████╗    ██║   ╚██████╔╝██║  ██║   ██║   ${NC}"
+echo -e "${YELLOW}╚═════╝ ╚═╝╚══════╝     ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ${NC}"
+echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}        ⚡ BIZHOST — BIZ FACTORY EDITION ⚡${NC}"
+echo -e "${RED}        Secure • Lightweight • Mobile Hosting${NC}"
+echo -e "${WHITE}        USER : $(whoami)${NC}"
+echo -e "${YELLOW}        ROOT : $SITE${NC}"
+echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-# ===== MENU =====
 echo "[ 1 ] Start Server (Auto Public Link)"
 echo "[ 2 ] Open Site Folder"
 echo "[ 3 ] Stop Server"
+echo "[ 4 ] Custom Domain (Advanced)"
+echo "[ 5 ] Update"
+echo "[ 6 ] About"
 echo "[ X ] Exit"
 echo ""
-
 read -p "BIZHOST > " opt
 
 case $opt in
 
-# ===== START SERVER =====
+# ===== START SERVER (AUTO PUBLIC LINK) =====
 1)
 clear
 
-if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE") 2>/dev/null; then
-    echo "Server already running"
-    sleep 2
+# Check if PHP is installed
+if ! command -v php &>/dev/null; then
+    echo -e "${RED}PHP is not installed. Please install it: pkg install php${NC}"
+    sleep 3
     continue
 fi
 
-pkill cloudflared 2>/dev/null
-
-php -S 127.0.0.1:8080 -t "$SITE" > /dev/null 2>&1 &
-echo $! > "$PIDFILE"
-
-echo -e "\e[1;36mStarting PHP server...\e[0m"
-sleep 2
-
-rm -f "$TMP"
-cloudflared tunnel --url http://127.0.0.1:8080 > "$TMP" 2>&1 &
-
-sleep 8
-
-LINK=$(grep -o 'https://[-a-zA-Z0-9\.]*trycloudflare.com' "$TMP" | head -n 1)
-
-clear
-echo -e "\e[1;32m━━━━━━━━ SERVER ONLINE ━━━━━━━━\e[0m"
-echo -e "\e[1;37mLocal  : http://localhost:8080\e[0m"
-
-if [ -n "$LINK" ]; then
-    echo -e "\e[1;33mPublic : $LINK\e[0m"
-else
-    echo -e "\e[1;31mPublic : Failed to create link\e[0m"
+# Check if cloudflared is installed
+if ! command -v cloudflared &>/dev/null; then
+    echo -e "${RED}cloudflared is not installed. Please install it: pkg install cloudflared${NC}"
+    sleep 3
+    continue
 fi
 
-echo -e "\e[1;32m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-echo ""
-echo "Keep terminal open for public access"
-echo "Press CTRL + C to stop public link"
+# Stop any existing servers
+pkill -f "php -S 127.0.0.1:8080" 2>/dev/null
+pkill cloudflared 2>/dev/null
+rm -f "$PIDFILE"
 
+# Ensure port 8080 is free
+if ss -tln | grep -q ':8080'; then
+    echo -e "${RED}Port 8080 is already in use. Please free it and try again.${NC}"
+    sleep 3
+    continue
+fi
+
+# Start PHP server
+echo -e "${BLUE}Starting PHP server...${NC}"
+php -S 127.0.0.1:8080 -t "$SITE" > /dev/null 2>&1 &
+PHP_PID=$!
+echo $PHP_PID > "$PIDFILE"
+
+# Wait a moment and verify PHP is running
+sleep 2
+if ! kill -0 $PHP_PID 2>/dev/null; then
+    echo -e "${RED}PHP server failed to start. Check if another process is using port 8080.${NC}"
+    sleep 3
+    continue
+fi
+
+# Test local connection
+if ! curl -s --head http://127.0.0.1:8080 | grep -q "HTTP/"; then
+    echo -e "${RED}PHP server is not responding on http://127.0.0.1:8080${NC}"
+    kill $PHP_PID 2>/dev/null
+    sleep 3
+    continue
+fi
+
+echo -e "${GREEN}PHP server is running.${NC}"
+
+# Start cloudflared tunnel
+echo -e "${BLUE}Starting Cloudflare tunnel...${NC}"
+rm -f "$TMP"
+cloudflared tunnel --url http://127.0.0.1:8080 > "$TMP" 2>&1 &
+CLOUDFLARED_PID=$!
+
+# Wait for tunnel to establish (max 15 seconds)
+echo -n "Waiting for public URL"
+for i in {1..15}; do
+    sleep 1
+    echo -n "."
+    LINK=$(grep -o 'https://[-a-zA-Z0-9\.]*trycloudflare.com' "$TMP" | head -n 1)
+    if [ -n "$LINK" ]; then
+        break
+    fi
+done
+echo ""
+
+clear
+echo -e "${GREEN}━━━━━━━━ SERVER ONLINE ━━━━━━━━${NC}"
+echo -e "${WHITE}Local  : http://localhost:8080${NC}"
+
+if [ -n "$LINK" ]; then
+    echo -e "${YELLOW}Public : $LINK${NC}"
+else
+    echo -e "${RED}Public : Failed to create link. Check cloudflared logs below:${NC}"
+    tail -n 20 "$TMP"
+fi
+
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Keep this terminal open. Press Ctrl+C to stop."
+# Wait indefinitely (user must Ctrl+C to exit)
 tail -f /dev/null
 ;;
 
@@ -103,17 +166,128 @@ bash
 # ===== STOP SERVER =====
 3)
 clear
+pkill -f "php -S 127.0.0.1:8080" 2>/dev/null
+pkill cloudflared 2>/dev/null
+rm -f "$PIDFILE"
+echo -e "${GREEN}Server stopped.${NC}"
+sleep 2
+;;
 
-if [ -f "$PIDFILE" ]; then
-    kill $(cat "$PIDFILE") 2>/dev/null
-    rm -f "$PIDFILE"
+# ===== CUSTOM DOMAIN (ADVANCED) =====
+4)
+clear
+echo -e "${BLUE}=== Custom Domain Setup ===${NC}"
+echo ""
+echo "This option allows you to use your own domain with Cloudflare Tunnel."
+echo "You must have:"
+echo "  1. A domain managed by Cloudflare"
+echo "  2. Completed 'cloudflared login'"
+echo "  3. Created a tunnel (e.g., named 'bizhost') and pointed it to http://localhost:8080"
+echo ""
+echo "If you haven't done this, follow these steps:"
+echo "  1. Run 'cloudflared tunnel login' and authenticate"
+echo "  2. Run 'cloudflared tunnel create bizhost'"
+echo "  3. Edit ~/.cloudflared/config.yml to route traffic to localhost:8080"
+echo "  4. Run 'cloudflared tunnel route dns bizhost your.domain.com'"
+echo ""
+read -p "Have you set up a tunnel named 'bizhost'? (y/n): " setup
+
+if [[ ! "$setup" =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}Please complete the setup first.${NC}"
+    sleep 3
+    continue
 fi
 
-pkill php 2>/dev/null
-pkill cloudflared 2>/dev/null
+# Check if tunnel exists
+if ! cloudflared tunnel list | grep -q bizhost; then
+    echo -e "${RED}Tunnel 'bizhost' not found. Please create it first.${NC}"
+    sleep 3
+    continue
+fi
 
-echo -e "\e[1;32mServer stopped\e[0m"
+# Stop any existing servers
+pkill -f "php -S 127.0.0.1:8080" 2>/dev/null
+pkill cloudflared 2>/dev/null
+rm -f "$PIDFILE"
+
+# Ensure port 8080 is free
+if ss -tln | grep -q ':8080'; then
+    echo -e "${RED}Port 8080 is already in use. Please free it and try again.${NC}"
+    sleep 3
+    continue
+fi
+
+# Start PHP server
+echo -e "${BLUE}Starting PHP server...${NC}"
+php -S 127.0.0.1:8080 -t "$SITE" > /dev/null 2>&1 &
+PHP_PID=$!
+echo $PHP_PID > "$PIDFILE"
+
 sleep 2
+if ! kill -0 $PHP_PID 2>/dev/null; then
+    echo -e "${RED}PHP server failed to start.${NC}"
+    sleep 3
+    continue
+fi
+
+# Start the named tunnel
+echo -e "${BLUE}Starting Cloudflare tunnel 'bizhost'...${NC}"
+cloudflared tunnel run bizhost > "$TMP" 2>&1 &
+
+echo -e "${GREEN}Tunnel is running with your custom domain.${NC}"
+echo "Keep this terminal open. Press Ctrl+C to stop."
+tail -f /dev/null
+;;
+
+# ===== UPDATE =====
+5)
+clear
+echo -e "${BLUE}Checking for updates...${NC}"
+# Fetch remote version (assuming a remote file with just the version number)
+REMOTE_VERSION=$(curl -s https://raw.githubusercontent.com/yourusername/bizhost/main/version.txt)
+if [ -z "$REMOTE_VERSION" ]; then
+    echo -e "${RED}Failed to check for updates. Check your internet connection.${NC}"
+    sleep 3
+    continue
+fi
+
+if [ "$REMOTE_VERSION" != "$VERSION" ]; then
+    echo -e "${YELLOW}New version available: $REMOTE_VERSION (current: $VERSION)${NC}"
+    read -p "Download and install? (y/n): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        echo -e "${BLUE}Downloading update...${NC}"
+        curl -L -o "$0.tmp" "$UPDATE_URL"
+        if [ $? -eq 0 ]; then
+            chmod +x "$0.tmp"
+            mv "$0.tmp" "$0"
+            echo -e "${GREEN}Update successful! Please restart the script.${NC}"
+            sleep 2
+            exit 0
+        else
+            echo -e "${RED}Download failed.${NC}"
+            rm -f "$0.tmp"
+        fi
+    fi
+else
+    echo -e "${GREEN}You are already using the latest version ($VERSION).${NC}"
+fi
+sleep 3
+;;
+
+# ===== ABOUT =====
+6)
+clear
+echo -e "${BLUE}════════════════════════════════════════${NC}"
+echo -e "${GREEN}      BIZHOST - BIZ FACTORY EDITION${NC}"
+echo -e "${BLUE}════════════════════════════════════════${NC}"
+echo -e "${WHITE}Version : $VERSION${NC}"
+echo -e "${WHITE}Author  : BIZ FACTORY${NC}"
+echo -e "${WHITE}License : MIT${NC}"
+echo -e "${WHITE}Description: Lightweight mobile hosting solution${NC}"
+echo -e "${WHITE}using PHP built-in server and Cloudflare Tunnel.${NC}"
+echo -e "${BLUE}════════════════════════════════════════${NC}"
+echo ""
+read -p "Press Enter to continue..."
 ;;
 
 x|X)
@@ -121,10 +295,9 @@ exit
 ;;
 
 *)
-echo "Invalid option"
+echo -e "${RED}Invalid option${NC}"
 sleep 1
 ;;
 
 esac
-
 done
