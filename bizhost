@@ -1,7 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 SITE="/storage/emulated/0/BIZHOST"
-TMP="/data/data/com.termux/files/usr/tmp/bizhostlink.log"
+PIDFILE="$PREFIX/tmp/bizhost.pid"
+TMP="$PREFIX/tmp/bizhostlink.log"
+
+mkdir -p "$PREFIX/tmp"
+mkdir -p "$SITE"
 
 # ===== BOOT =====
 clear
@@ -20,28 +24,26 @@ while true
 do
 clear
 
-# ===== HEADER =====
-echo -e "\e[1;32m██████╗ ██╗███████╗██╗  ██╗ ██████╗ ███████╗████████╗"
-echo "██╔══██╗██║╚══███╔╝██║  ██║██╔═══██╗██╔════╝╚══██╔══╝"
-echo "██████╔╝██║  ███╔╝ ███████║██║   ██║███████╗   ██║   "
-echo "██╔══██╗██║ ███╔╝  ██╔══██║██║   ██║╚════██║   ██║   "
-echo "██████╔╝██║███████╗██║  ██║╚██████╔╝███████║   ██║   "
-echo "╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝   "
-echo -e "\e[0m"
+# ===== BIZ FACTORY BRAND LOGO =====
+echo -e "\e[1;32m██████╗ ██╗███████╗     ███████╗ █████╗  ██████╗ ████████╗ ██████╗ ██████╗ ██╗   ██╗"
+echo "██╔══██╗██║╚══███╔╝     ██╔════╝██╔══██╗██╔════╝ ╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝"
+echo -e "\e[1;36m██████╔╝██║  ███╔╝█████╗█████╗  ███████║██║         ██║   ██║   ██║██████╔╝ ╚████╔╝ \e[0m"
+echo -e "\e[1;36m██╔══██╗██║ ███╔╝ ╚════╝██╔══╝  ██╔══██║██║         ██║   ██║   ██║██╔══██╗  ╚██╔╝  \e[0m"
+echo -e "\e[1;33m██████╔╝██║███████╗     ██║     ██║  ██║╚██████╗    ██║   ╚██████╔╝██║  ██║   ██║   \e[0m"
+echo -e "\e[1;33m╚═════╝ ╚═╝╚══════╝     ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   \e[0m"
 
-echo -e "\e[1;35m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-echo -e "\e[1;36m  BIZ HOSTING  — ONLINE\e[0m"
-echo -e "\e[1;31m  SECURITY LEVEL : MAXIMUM\e[0m"
-echo -e "\e[1;37m  USER           : $(whoami)\e[0m"
-echo -e "\e[1;33m  ROOT DIR       : $SITE\e[0m"
-echo -e "\e[1;35m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+echo -e "\e[1;35m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+echo -e "\e[1;36m        ⚡ BIZHOST — BIZ FACTORY ⚡\e[0m"
+echo -e "\e[1;31m        Secure • Lightweight • Mobile Hosting\e[0m"
+echo -e "\e[1;37m        USER : $(whoami)\e[0m"
+echo -e "\e[1;33m        ROOT : $SITE\e[0m"
+echo -e "\e[1;35m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
 echo ""
 
 # ===== MENU =====
-echo "[ 1 ] Start Server (localhost:8080)"
-echo "[ 2 ] Create Public Link"
-echo "[ 3 ] Open Site Folder"
-echo "[ 4 ] Stop Server"
+echo "[ 1 ] Start Server (Auto Public Link)"
+echo "[ 2 ] Open Site Folder"
+echo "[ 3 ] Stop Server"
 echo "[ X ] Exit"
 echo ""
 
@@ -52,64 +54,65 @@ case $opt in
 # ===== START SERVER =====
 1)
 clear
-echo -e "\e[1;32m━━━━━━━━ SERVER STATUS ━━━━━━━━\e[0m"
-echo -e "\e[1;36mPHP SERVER INITIALIZED\e[0m"
-echo -e "\e[1;37mAddress : http://localhost:8080\e[0m"
-echo -e "\e[1;33mRoot    : $SITE\e[0m"
-echo -e "\e[1;32m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-echo ""
-php -S 0.0.0.0:8080 -t "$SITE"
-;;
 
-# ===== PUBLIC LINK =====
-2)
-clear
-echo -e "\e[1;32m━━━━━━━━ PUBLIC ACCESS ━━━━━━━━\e[0m"
-echo -e "\e[1;36mGenerating secure tunnel...\e[0m"
-echo ""
+if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE") 2>/dev/null; then
+    echo "Server already running"
+    sleep 2
+    continue
+fi
+
+pkill cloudflared 2>/dev/null
+
+php -S 127.0.0.1:8080 -t "$SITE" > /dev/null 2>&1 &
+echo $! > "$PIDFILE"
+
+echo -e "\e[1;36mStarting PHP server...\e[0m"
+sleep 2
 
 rm -f "$TMP"
+cloudflared tunnel --url http://127.0.0.1:8080 > "$TMP" 2>&1 &
 
-cloudflared tunnel --url http://localhost:8080 > "$TMP" 2>&1 &
-
-sleep 7
+sleep 8
 
 LINK=$(grep -o 'https://[-a-zA-Z0-9\.]*trycloudflare.com' "$TMP" | head -n 1)
 
 clear
-echo -e "\e[1;32m━━━━━━━━ PUBLIC ACCESS ━━━━━━━━\e[0m"
+echo -e "\e[1;32m━━━━━━━━ SERVER ONLINE ━━━━━━━━\e[0m"
+echo -e "\e[1;37mLocal  : http://localhost:8080\e[0m"
 
 if [ -n "$LINK" ]; then
-    echo -e "\e[1;36mSTATUS : ACTIVE\e[0m"
-    echo -e "\e[1;37mLocal  : http://localhost:8080\e[0m"
     echo -e "\e[1;33mPublic : $LINK\e[0m"
 else
-    echo -e "\e[1;31mSTATUS : FAILED\e[0m"
-    echo -e "\e[1;37mMake sure server is running\e[0m"
+    echo -e "\e[1;31mPublic : Failed to create link\e[0m"
 fi
 
 echo -e "\e[1;32m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
 echo ""
+echo "Keep terminal open for public access"
 echo "Press CTRL + C to stop public link"
 
 tail -f /dev/null
 ;;
 
 # ===== OPEN FOLDER =====
-3)
-clear
-echo -e "\e[1;36mOpening site directory...\e[0m"
+2)
 cd "$SITE"
 bash
 ;;
 
 # ===== STOP SERVER =====
-4)
+3)
 clear
-pkill php
-echo -e "\e[1;32m━━━━━━━━ SERVER STOPPED ━━━━━━━━\e[0m"
-echo -e "\e[1;36mPHP server terminated\e[0m"
-echo -e "\e[1;32m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
+
+if [ -f "$PIDFILE" ]; then
+    kill $(cat "$PIDFILE") 2>/dev/null
+    rm -f "$PIDFILE"
+fi
+
+pkill php 2>/dev/null
+pkill cloudflared 2>/dev/null
+
+echo -e "\e[1;32mServer stopped\e[0m"
 sleep 2
 ;;
 
