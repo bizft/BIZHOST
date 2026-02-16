@@ -244,7 +244,7 @@ tail -f /dev/null
 clear
 echo -e "${BLUE}Checking for updates...${NC}"
 # Fetch remote version (assuming a remote file with just the version number)
-REMOTE_VERSION=$(curl -s https://raw.githubusercontent.com/yourusername/bizhost/main/version.txt)
+REMOTE_VERSION=$(curl -s https://raw.githubusercontent.com/bizft/BIZHOST/refs/heads/master/update)
 if [ -z "$REMOTE_VERSION" ]; then
     echo -e "${RED}Failed to check for updates. Check your internet connection.${NC}"
     sleep 3
